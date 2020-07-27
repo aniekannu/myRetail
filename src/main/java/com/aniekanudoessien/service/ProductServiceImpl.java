@@ -72,8 +72,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductInfo setPrice(PriceChange priceChange){
         Price createPrice = new Price();
-        ProductInfo createdProductInfo = new ProductInfo();
-        createdProductInfo.setCurrentPrice(new CurrentPrice());
+        ProductInfo createdProductInfo = null;
         String stringId = String.valueOf(priceChange.getProductId());
         String url = String.format(config.getRedskyUrl(), stringId);
         try{
@@ -82,11 +81,7 @@ public class ProductServiceImpl implements ProductService{
             createPrice.setProductId(Long.valueOf(redskyProduct.getProduct().getItem().getProductId()));
             createPrice.setValue(priceChange.getValue());
             priceRepository.save(createPrice);
-            createdProductInfo.setId(createPrice.getProductId());
-            createdProductInfo.setName(redskyProduct.getProduct().getItem().getProductDescription().getTitle());
-            createdProductInfo.getCurrentPrice().setCurrencyCode(Currency.USD.getValue());
-            createdProductInfo.getCurrentPrice().setValue(createPrice.getValue());
-
+            createdProductInfo = getProductInfo(redskyProduct, createPrice);
 
         } catch(ProductNotFoundException ex){
             throw new ProductNotFoundException("Product with id " + stringId + " is not a valid product");

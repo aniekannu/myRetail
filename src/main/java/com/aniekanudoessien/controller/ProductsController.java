@@ -1,6 +1,5 @@
 package com.aniekanudoessien.controller;
 
-import com.aniekanudoessien.exception.ProductNotFoundException;
 import com.aniekanudoessien.model.PriceChange;
 import com.aniekanudoessien.model.responseproduct.ProductInfo;
 import com.aniekanudoessien.service.ProductService;
