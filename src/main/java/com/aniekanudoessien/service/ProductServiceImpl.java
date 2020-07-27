@@ -31,8 +31,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductInfo getById(Long id) throws ProductNotFoundException {
 
-        ProductInfo productInfo = new ProductInfo();
-        productInfo.setCurrentPrice(new CurrentPrice());
+        ProductInfo productInfo = null;
         String stringId = String.valueOf(id);
         String url = String.format(config.getRedskyUrl(), stringId);
 
@@ -95,8 +94,9 @@ public class ProductServiceImpl implements ProductService{
         return createdProductInfo;
     }
 
-    private ProductInfo getProductInfo(ProductDetail productDetail, Price priceInfo){
+    private ProductInfo getProductInfo(ProductDetail productDetail, Price priceInfo) {
         ProductInfo productInfo = new ProductInfo();
+        productInfo.setCurrentPrice(new CurrentPrice());
         productInfo.setId(priceInfo.getProductId());
         productInfo.setName(productDetail.getProduct().getItem().getProductDescription().getTitle());
         productInfo.getCurrentPrice().setValue(priceInfo.getValue());
