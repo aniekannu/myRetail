@@ -3,7 +3,7 @@ package com.aniekanudoessien.repository;
 import com.aniekanudoessien.model.Price;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface PriceRepository extends MongoRepository<Price, Integer> {
+public interface PriceRepository extends MongoRepository<Price, String> {
 
-    Price findByProductId(String productId);
+    Price findByProductId(Long id);
 }

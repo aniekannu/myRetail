@@ -1,10 +1,13 @@
 package com.aniekanudoessien.service;
 
-import com.aniekanudoessien.model.ProductInfo;
+import com.aniekanudoessien.model.PriceChange;
+import com.aniekanudoessien.model.responseproduct.ProductInfo;
 
 public interface ProductService {
 
-    ProductInfo getById(String id);
+    ProductInfo getById(Long id) throws Exception;
 
-    ProductInfo update(ProductInfo productInfo);
+    ProductInfo setPrice (PriceChange priceChange) throws Exception;
+
+    ProductInfo updatePrice(Long productId, ProductInfo productInfo) throws Exception;
 }
