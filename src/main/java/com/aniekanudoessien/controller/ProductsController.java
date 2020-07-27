@@ -42,4 +42,12 @@ public class ProductsController {
 
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
+
+    @DeleteMapping(value = "/products/{productId}")
+    public ResponseEntity<Object> deleteItem(@PathVariable Long productId) throws Exception{
+
+        String deletedResponse = productService.deleteProduct(productId);
+
+        return new ResponseEntity<>(deletedResponse, HttpStatus.OK);
+    }
 }

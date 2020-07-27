@@ -29,7 +29,7 @@ public class ProductServiceImpl implements ProductService{
 
 
     @Override
-    public ProductInfo getById(Long id) throws ProductNotFoundException {
+    public ProductInfo getById(Long id) {
 
         ProductInfo productInfo = null;
         String stringId = String.valueOf(id);
@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductInfo updatePrice(Long productId, ProductInfo productInfo) throws ProductNotFoundException{
+    public ProductInfo updatePrice(Long productId, ProductInfo productInfo) {
 
         String stringId = String.valueOf(productId);
         String url = String.format(config.getRedskyUrl(), stringId);
@@ -70,7 +70,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductInfo setPrice(PriceChange priceChange){
+    public ProductInfo setPrice(PriceChange priceChange) {
         Price createPrice = new Price();
         ProductInfo createdProductInfo = null;
         String stringId = String.valueOf(priceChange.getProductId());
@@ -87,6 +87,30 @@ public class ProductServiceImpl implements ProductService{
             throw new ProductNotFoundException("Product with id " + stringId + " is not a valid product");
         }
         return createdProductInfo;
+    }
+
+    @Override
+    public String deleteProduct(Long id) {
+        ProductInfo productInfo = null;
+        String stringId = String.valueOf(id);
+        String url = String.format(config.getRedskyUrl(), stringId);
+
+        try{
+            ResponseEntity<ProductDetail> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>() {
+            });
+
+            ProductDetail productDetail = response.getBody();
+            String productId = productDetail.getProduct().getItem().getProductId();
+            Price priceInfo = priceRepository.findByProductId(Long.valueOf(productId));
+            if(priceInfo == null){
+                throw new ProductNotFoundException("Product with id " + stringId + " could not be found");
+            }
+            priceRepository.deleteByProductId(Long.valueOf(productId));
+
+        } catch(Exception ex){
+            throw new ProductNotFoundException("Product with id " + stringId + " could not be found");
+        }
+        return "Product with id " + stringId + " has been deleted";
     }
 
     private ProductInfo getProductInfo(ProductDetail productDetail, Price priceInfo) {

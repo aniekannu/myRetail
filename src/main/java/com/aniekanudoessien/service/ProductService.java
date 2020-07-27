@@ -10,4 +10,6 @@ public interface ProductService {
     ProductInfo setPrice (PriceChange priceChange) throws Exception;
 
     ProductInfo updatePrice(Long productId, ProductInfo productInfo) throws Exception;
+
+    String deleteProduct(Long id) throws Exception;
 }
