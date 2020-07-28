@@ -63,6 +63,6 @@ public class ExceptionHandler {
         ErrorResonse error = new ErrorResonse();
         error.setMessage("Operation could not be performed");
         error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
