@@ -18,20 +18,33 @@ public class ProductsController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping(value = "/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getItemInfo(@PathVariable Long productId) throws Exception{
-
-        ProductInfo productInfo = productService.getById(productId);
-
-        return new ResponseEntity<>(productInfo, HttpStatus.OK);
-    }
-
+    // for admin
     @PostMapping(value = "/prices", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> setPriceData(@RequestBody PriceChange priceChange) throws Exception {
 
         ProductInfo productInfo = productService.setPrice(priceChange);
 
         return new ResponseEntity<>(productInfo, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping(value = "/products/{productId}")
+    public ResponseEntity<Object> deleteItem(@PathVariable Long productId) throws Exception{
+
+        String deletedResponse = productService.deleteProduct(productId);
+
+        return new ResponseEntity<>(deletedResponse, HttpStatus.OK);
+    }
+
+
+
+
+    // for client
+    @GetMapping(value = "/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getItemInfo(@PathVariable Long productId) throws Exception{
+
+        ProductInfo productInfo = productService.getById(productId);
+
+        return new ResponseEntity<>(productInfo, HttpStatus.OK);
     }
 
     @PutMapping(value = "/products/{productId}")
@@ -41,13 +54,5 @@ public class ProductsController {
         ProductInfo updatedProduct = productService.updatePrice(productId, productInfo);
 
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
-    }
-
-    @DeleteMapping(value = "/products/{productId}")
-    public ResponseEntity<Object> deleteItem(@PathVariable Long productId) throws Exception{
-
-        String deletedResponse = productService.deleteProduct(productId);
-
-        return new ResponseEntity<>(deletedResponse, HttpStatus.OK);
     }
 }

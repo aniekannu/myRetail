@@ -1,6 +1,6 @@
 package com.aniekanudoessien.service;
 
-import com.aniekanudoessien.exception.ProductNotFoundException;
+import com.aniekanudoessien.exception.*;
 import com.aniekanudoessien.model.*;
 import com.aniekanudoessien.model.redskyproduct.ProductDetail;
 import com.aniekanudoessien.model.responseproduct.CurrentPrice;
@@ -12,6 +12,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -28,49 +29,9 @@ public class ProductServiceImpl implements ProductService{
     private Config config;
 
 
-    @Override
-    public ProductInfo getById(Long id) {
-
-        ProductInfo productInfo = null;
-        String stringId = String.valueOf(id);
-        String url = String.format(config.getRedskyUrl(), stringId);
-
-        try{
-            ResponseEntity<ProductDetail> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>() {
-            });
-
-            ProductDetail productDetail = response.getBody();
-            String productId = productDetail.getProduct().getItem().getProductId();
-            Price priceInfo = priceRepository.findByProductId(Long.valueOf(productId));
-            productInfo = getProductInfo(productDetail, priceInfo);
-
-        } catch (ProductNotFoundException ex){
-            throw new ProductNotFoundException("Product with id " + stringId + " could not be found");
-        }
-        return productInfo;
-    }
 
     @Override
-    public ProductInfo updatePrice(Long productId, ProductInfo productInfo) {
-
-        String stringId = String.valueOf(productId);
-        String url = String.format(config.getRedskyUrl(), stringId);
-        try{
-            ResponseEntity<ProductDetail> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>() {
-            });
-            ProductDetail productDetail = response.getBody();
-            Price dbPrice = priceRepository.findByProductId(Long.valueOf(productDetail.getProduct().getItem().getProductId()));
-            dbPrice.setValue(productInfo.getCurrentPrice().getValue());
-            priceRepository.save(dbPrice);
-
-        } catch(ProductNotFoundException ex){
-            throw new ProductNotFoundException("The price of product with id " + stringId + " could not be updated");
-        }
-        return productInfo;
-    }
-
-    @Override
-    public ProductInfo setPrice(PriceChange priceChange) {
+    public ProductInfo setPrice(PriceChange priceChange) throws RestClientException, ProductAlreadyExistsException {
         Price createPrice = new Price();
         ProductInfo createdProductInfo = null;
         String stringId = String.valueOf(priceChange.getProductId());
@@ -78,19 +39,52 @@ public class ProductServiceImpl implements ProductService{
         try{
             ResponseEntity<ProductDetail> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>(){});
             ProductDetail redskyProduct = response.getBody();
+            String productId = redskyProduct.getProduct().getItem().getProductId();
+            Price priceInfo = priceRepository.findByProductId(Long.valueOf(productId));
+            if(priceInfo != null){
+                throw new ProductAlreadyExistsException("Product with id " + stringId + " already exits");
+            }
             createPrice.setProductId(Long.valueOf(redskyProduct.getProduct().getItem().getProductId()));
             createPrice.setValue(priceChange.getValue());
             priceRepository.save(createPrice);
             createdProductInfo = getProductInfo(redskyProduct, createPrice);
-
-        } catch(ProductNotFoundException ex){
-            throw new ProductNotFoundException("Product with id " + stringId + " is not a valid product");
+        } catch(RestClientException ex){
+            throw new RestClientException("Product with id " + stringId + " is invalid");
+        } catch(ProductAlreadyExistsException exc){
+            throw new ProductAlreadyExistsException(exc.getMessage());
         }
         return createdProductInfo;
     }
 
     @Override
-    public String deleteProduct(Long id) {
+    public String deleteProduct(Long id) throws RestClientException, ProductNotFoundException{
+        ProductInfo productInfo = null;
+        String stringId = String.valueOf(id);
+        String url = String.format(config.getRedskyUrl(), stringId);
+
+        try {
+            ResponseEntity<ProductDetail> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>() {
+            });
+
+            ProductDetail productDetail = response.getBody();
+            String productId = productDetail.getProduct().getItem().getProductId();
+            Price priceInfo = priceRepository.findByProductId(Long.valueOf(productId));
+            if (priceInfo == null) {
+                throw new ProductNotFoundException("Product with id " + stringId + " could not be found");
+            }
+            priceRepository.deleteByProductId(Long.valueOf(productId));
+
+        } catch(RestClientException ex){
+            throw new RestClientException("Product with id " + id + " does not exist");
+        } catch(ProductNotFoundException ex){
+            throw new ProductNotFoundException(ex.getMessage());
+        }
+        return "Product with id " + stringId + " has been deleted";
+    }
+
+    @Override
+    public ProductInfo getById(Long id) throws ProductNotFoundException, RestClientException{
+
         ProductInfo productInfo = null;
         String stringId = String.valueOf(id);
         String url = String.format(config.getRedskyUrl(), stringId);
@@ -99,18 +93,51 @@ public class ProductServiceImpl implements ProductService{
             ResponseEntity<ProductDetail> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>() {
             });
 
-            ProductDetail productDetail = response.getBody();
-            String productId = productDetail.getProduct().getItem().getProductId();
+            ProductDetail redskyProduct = response.getBody();
+            String productId = redskyProduct.getProduct().getItem().getProductId();
             Price priceInfo = priceRepository.findByProductId(Long.valueOf(productId));
             if(priceInfo == null){
                 throw new ProductNotFoundException("Product with id " + stringId + " could not be found");
             }
-            priceRepository.deleteByProductId(Long.valueOf(productId));
+            productInfo = getProductInfo(redskyProduct, priceInfo);
 
-        } catch(Exception ex){
-            throw new ProductNotFoundException("Product with id " + stringId + " could not be found");
+        } catch(RestClientException ex){
+            throw new RestClientException("Product with id " + stringId + " is an invalid item");
+        } catch (ProductNotFoundException ex){
+            throw new ProductNotFoundException(ex.getMessage());
         }
-        return "Product with id " + stringId + " has been deleted";
+        return productInfo;
+    }
+
+    @Override
+    public ProductInfo updatePrice(Long productId, ProductInfo productInfo) throws InvalidInputDataException, InvalidProductException, RestClientException {
+
+        String stringId = String.valueOf(productId);
+        String url = String.format(config.getRedskyUrl(), stringId);
+        try{
+            if(!productId.equals(productInfo.getId())){
+                throw new InvalidInputDataException("Inconsistent productId provided");
+            }
+            ResponseEntity<ProductDetail> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<ProductDetail>() {
+            });
+            ProductDetail productDetail = response.getBody();
+            Price dbPrice = priceRepository.findByProductId(Long.valueOf(productDetail.getProduct().getItem().getProductId()));
+            if(dbPrice == null){
+                throw new InvalidProductException("Product with id " + productId + " is not valid");
+            }
+            double updatedValue = Double.parseDouble(String.format("%,.2f", productInfo.getCurrentPrice().getValue()));
+            dbPrice.setValue(updatedValue);
+            priceRepository.save(dbPrice);
+            productInfo.getCurrentPrice().setValue(updatedValue);
+
+        } catch(RestClientException ex){
+            throw new RestClientException("Product with id " + productId + " does not exist");
+        } catch(InvalidInputDataException e){
+            throw new InvalidInputDataException(e.getMessage());
+        } catch(InvalidProductException exc) {
+            throw new InvalidProductException(exc.getMessage());
+        }
+        return productInfo;
     }
 
     private ProductInfo getProductInfo(ProductDetail productDetail, Price priceInfo) {
@@ -118,7 +145,7 @@ public class ProductServiceImpl implements ProductService{
         productInfo.setCurrentPrice(new CurrentPrice());
         productInfo.setId(priceInfo.getProductId());
         productInfo.setName(productDetail.getProduct().getItem().getProductDescription().getTitle());
-        productInfo.getCurrentPrice().setValue(priceInfo.getValue());
+        productInfo.getCurrentPrice().setValue(Double.parseDouble(String.format("%,.2f", priceInfo.getValue())));
         productInfo.getCurrentPrice().setCurrencyCode(Currency.USD.getValue());
         return  productInfo;
     }
