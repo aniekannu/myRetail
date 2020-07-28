@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductDetail {
+public class CatalogProduct {
 
     @JsonProperty("product")
     private Product product;
 
-    public ProductDetail(){}
+    public CatalogProduct(){}
 
-    public ProductDetail(Product product) {
+    public CatalogProduct(Product product) {
         this.product = product;
     }
 
