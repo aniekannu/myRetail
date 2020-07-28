@@ -6,7 +6,6 @@ import com.aniekanudoessien.service.ProductService;
 import com.aniekanudoessien.util.MyRetailPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,7 @@ public class ProductsController {
     private ProductService productService;
 
     // for admin
-    @PostMapping(value = "/prices", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = MyRetailPath.RESOURCE_PRICES)
     public ResponseEntity<Object> setPriceData(@RequestBody PriceChange priceChange) throws Exception {
 
         ProductInfo productInfo = productService.setPrice(priceChange);
@@ -27,7 +26,7 @@ public class ProductsController {
         return new ResponseEntity<>(productInfo, HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = "/products/{productId}")
+    @DeleteMapping(value = MyRetailPath.RESOURCE_PATH_VARIABLE)
     public ResponseEntity<Object> deleteItem(@PathVariable Long productId) throws Exception{
 
         String deletedResponse = productService.deleteProduct(productId);
@@ -39,7 +38,7 @@ public class ProductsController {
 
 
     // for client
-    @GetMapping(value = "/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = MyRetailPath.RESOURCE_PATH_VARIABLE)
     public ResponseEntity<Object> getItemInfo(@PathVariable Long productId) throws Exception{
 
         ProductInfo productInfo = productService.getById(productId);
@@ -47,7 +46,7 @@ public class ProductsController {
         return new ResponseEntity<>(productInfo, HttpStatus.OK);
     }
 
-    @PutMapping(value = "/products/{productId}")
+    @PutMapping(value = MyRetailPath.RESOURCE_PATH_VARIABLE)
     public ResponseEntity<Object> updatePrice(@PathVariable Long productId,
                                               @RequestBody ProductInfo productInfo) throws Exception{
 
