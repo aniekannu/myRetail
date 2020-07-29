@@ -3,7 +3,6 @@ package com.aniekanudoessien.service;
 import com.aniekanudoessien.exception.*;
 import com.aniekanudoessien.model.*;
 import com.aniekanudoessien.model.redskyproduct.CatalogProduct;
-import com.aniekanudoessien.model.responseproduct.CurrentPrice;
 import com.aniekanudoessien.model.responseproduct.ProductInfo;
 import com.aniekanudoessien.repository.PriceRepository;
 import com.aniekanudoessien.util.Config;
@@ -142,7 +141,6 @@ public class ProductServiceImpl implements ProductService{
 
     private ProductInfo getProductInfo(CatalogProduct catalogProduct, Price priceInfo) {
         ProductInfo productInfo = new ProductInfo();
-        productInfo.setCurrentPrice(new CurrentPrice());
         productInfo.setId(priceInfo.getProductId());
         productInfo.setName(catalogProduct.getProduct().getItem().getProductDescription().getTitle());
         productInfo.getCurrentPrice().setValue(Double.parseDouble(String.format("%,.2f", priceInfo.getValue())));

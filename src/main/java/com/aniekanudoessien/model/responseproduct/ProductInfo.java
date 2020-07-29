@@ -15,7 +15,7 @@ public class ProductInfo {
     private String name;
 
     @JsonProperty("current_price")
-    private CurrentPrice currentPrice;
+    private CurrentPrice currentPrice = new CurrentPrice();
 
     public ProductInfo(){}
 
@@ -51,6 +51,6 @@ public class ProductInfo {
 
     @Override
     public String toString() {
-        return "Product name - " + name;
+        return "ProductInfo: id = " + id + ", name = " + name + ", " + currentPrice.toString();
     }
 }

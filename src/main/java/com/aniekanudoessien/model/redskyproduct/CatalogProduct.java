@@ -1,6 +1,5 @@
 package com.aniekanudoessien.model.redskyproduct;
 
-import com.aniekanudoessien.model.redskyproduct.Product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

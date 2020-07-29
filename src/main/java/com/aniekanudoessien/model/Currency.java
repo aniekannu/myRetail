@@ -1,7 +1,5 @@
 package com.aniekanudoessien.model;
 
-import org.springframework.stereotype.Component;
-
 public enum Currency {
     USD("USD");
 

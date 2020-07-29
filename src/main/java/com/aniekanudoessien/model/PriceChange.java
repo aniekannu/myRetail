@@ -8,6 +8,7 @@ public class PriceChange {
 
     @JsonProperty("productId")
     private Long productId;
+
     @JsonProperty("value")
     private double value;
 
@@ -33,4 +34,10 @@ public class PriceChange {
     public void setValue(double value) {
         this.value = value;
     }
+
+    @Override
+    public String toString(){
+        return "PriceChange: productId = " + productId + ", value = " + value + ".";
+    }
+
 }

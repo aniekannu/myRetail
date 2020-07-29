@@ -10,6 +10,7 @@ public class CurrentPrice {
 
     @JsonProperty("value")
     private double value;
+
     @JsonProperty("currency_code")
     private String currencyCode;
 
@@ -34,5 +35,10 @@ public class CurrentPrice {
 
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
+    }
+
+    @Override
+    public String toString(){
+        return "value = " + value + ", currency code = " + currencyCode + ".";
     }
 }
