@@ -124,10 +124,13 @@ public class ProductServiceImpl implements ProductService{
             if(dbPrice == null){
                 throw new InvalidProductException("Product with id " + productId + " is not valid");
             }
-            double updatedValue = Double.parseDouble(String.format("%,.2f", productInfo.getCurrentPrice().getValue()));
+            double updatedValue = Double.parseDouble(String.format("%.2f", productInfo.getCurrentPrice().getValue()));
             dbPrice.setValue(updatedValue);
             priceRepository.save(dbPrice);
             productInfo.getCurrentPrice().setValue(updatedValue);
+            productInfo.getCurrentPrice().setCurrencyCode(Currency.USD.getValue());
+            productInfo.setName(catalogProduct.getProduct().getItem().getProductDescription().getTitle());
+            productInfo.setId(Long.valueOf(catalogProduct.getProduct().getItem().getProductId()));
 
         } catch(RestClientException ex){
             throw new RestClientException("Product with id " + productId + " does not exist");
@@ -143,7 +146,7 @@ public class ProductServiceImpl implements ProductService{
         ProductInfo productInfo = new ProductInfo();
         productInfo.setId(priceInfo.getProductId());
         productInfo.setName(catalogProduct.getProduct().getItem().getProductDescription().getTitle());
-        productInfo.getCurrentPrice().setValue(Double.parseDouble(String.format("%,.2f", priceInfo.getValue())));
+        productInfo.getCurrentPrice().setValue(Double.parseDouble(String.format("%.2f", priceInfo.getValue())));
         productInfo.getCurrentPrice().setCurrencyCode(Currency.USD.getValue());
         return  productInfo;
     }
