@@ -9,7 +9,7 @@ myRetail is a rapidly growing company with HQ in Richmond, VA and over 200 store
 - MongoDB
 
 ## App Design
-The application is setup to validate every product id that is provided to its endpoints against Redsky Product Catalog. Afterwards, it also checks the mongoDB database for a product id match before any one of the 4 CRUD operations are performed. Ultimately, a response entity is returned to the calling client, along with a Http status response code that indicates the outcome of the operation. 
+The application is setup to validate every product id that is provided to its endpoints against Redsky Product Catalog. Afterwards, it checks a specified mongoDB database for a product id match before any one of the 4 CRUD operations are performed. Ultimately, a response entity is returned to the calling client, along with a HTTP status response code that indicates the outcome of the operation. 
 
 ## Notable Class Objects
 - Redsky Catalog response body is bound to the CatalogProduct class
@@ -18,7 +18,7 @@ The application is setup to validate every product id that is provided to its en
 
 ## How to interact with myRetailAPI
 - Postman
-- Insomia
+- Insomnia
 - cURL
 
 ## Endpoints
