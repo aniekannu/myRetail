@@ -37,6 +37,8 @@ public class ProductsController {
 
 
 
+
+
     // for client
     @GetMapping(value = MyRetailPath.RESOURCE_PATH_VARIABLE)
     public ResponseEntity<Object> getItemInfo(@PathVariable Long productId) throws Exception{

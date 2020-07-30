@@ -17,18 +17,27 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DeleteProductIntegrationTest {
+public class UpdateProductIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private PriceRepository repo;
 
+
+    // FAILING
     @Test
-    public void deleteProduct_Verify200_StatusCode() throws Exception{
+    public void Verify200_ProductPriceUpdate() throws Exception{
 
-        // create mock for new product
+
+        // acquire mock to create product
         PriceChange mockCreatedProduct = TestResourceLoader
-                .loadFromRelativePath("ValidDeletePayload.json", new TypeReference<PriceChange>() {});
+                .loadFromRelativePath("ValidPayloadUpdate.json", new TypeReference<PriceChange>() {});
+        repo.deleteByProductId(mockCreatedProduct.getProductId());
+
+
+        // create new product and assert equals for status code 201
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PriceChange> entity = new HttpEntity<>(mockCreatedProduct, headers);
@@ -36,15 +45,19 @@ public class DeleteProductIntegrationTest {
                 HttpMethod.POST, entity, ProductInfo.class);
         Assert.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 
-        // delete the product
-        String deleteUrl = MyRetailPath.MYRETAIL_BASE_PATH + "/products/" + mockCreatedProduct.getProductId();
-        ResponseEntity<String> deletedResponseEntity = restTemplate.exchange(deleteUrl, HttpMethod.DELETE, null, String.class);
-        Assert.assertNotNull(deletedResponseEntity.getBody());
+        // acquire mock to update product
+        ProductInfo mockedUpdatedPayload = TestResourceLoader
+                .loadFromRelativePath("ValidUpdatedPayloadForUpdate.json", new TypeReference<ProductInfo>() {});
 
-        // attempt to fetch the product
-        String getUrl = MyRetailPath.MYRETAIL_BASE_PATH + "/products/" + mockCreatedProduct.getProductId();
-        ResponseEntity<ProductInfo> getResponseEntity = restTemplate.exchange(getUrl, HttpMethod.GET, null, ProductInfo.class);
-        Assert.assertEquals(HttpStatus.NOT_FOUND, getResponseEntity.getStatusCode());
+
+        String url = MyRetailPath.MYRETAIL_BASE_PATH + "/products/" + mockedUpdatedPayload.getId();
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ProductInfo> updatedEntity = new HttpEntity<>(mockedUpdatedPayload, headers);
+        ResponseEntity<ProductInfo> updatedResponseEntity = restTemplate.exchange(url, HttpMethod.PUT,
+                updatedEntity, ProductInfo.class);
+        Assert.assertEquals(HttpStatus.OK, updatedResponseEntity.getStatusCode());
+
+        repo.deleteByProductId(mockedUpdatedPayload.getId());
     }
-
 }

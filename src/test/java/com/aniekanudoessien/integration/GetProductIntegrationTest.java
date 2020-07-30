@@ -17,18 +17,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DeleteProductIntegrationTest {
+public class GetProductIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private PriceRepository repo;
 
     @Test
-    public void deleteProduct_Verify200_StatusCode() throws Exception{
-
-        // create mock for new product
+    public void Verify200StatusForGetEndpoint() throws Exception{
         PriceChange mockCreatedProduct = TestResourceLoader
-                .loadFromRelativePath("ValidDeletePayload.json", new TypeReference<PriceChange>() {});
+                .loadFromRelativePath("ValidPayloadForGet.json", new TypeReference<PriceChange>() {});
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PriceChange> entity = new HttpEntity<>(mockCreatedProduct, headers);
@@ -36,15 +36,11 @@ public class DeleteProductIntegrationTest {
                 HttpMethod.POST, entity, ProductInfo.class);
         Assert.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 
-        // delete the product
-        String deleteUrl = MyRetailPath.MYRETAIL_BASE_PATH + "/products/" + mockCreatedProduct.getProductId();
-        ResponseEntity<String> deletedResponseEntity = restTemplate.exchange(deleteUrl, HttpMethod.DELETE, null, String.class);
-        Assert.assertNotNull(deletedResponseEntity.getBody());
-
-        // attempt to fetch the product
         String getUrl = MyRetailPath.MYRETAIL_BASE_PATH + "/products/" + mockCreatedProduct.getProductId();
         ResponseEntity<ProductInfo> getResponseEntity = restTemplate.exchange(getUrl, HttpMethod.GET, null, ProductInfo.class);
-        Assert.assertEquals(HttpStatus.NOT_FOUND, getResponseEntity.getStatusCode());
+        Assert.assertEquals(HttpStatus.OK, getResponseEntity.getStatusCode());
+
+        repo.deleteByProductId(mockCreatedProduct.getProductId());
     }
 
 }

@@ -23,16 +23,15 @@ import java.util.Random;
 public class CreateProductIntegrationTest {
 
     @Autowired
-    TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate;
 
     @Autowired
-    PriceRepository repo;
+    private PriceRepository repo;
 
     @Test
     public void setPriceData_Verify201_Created() throws Exception{
         PriceChange mockCreatedProduct = TestResourceLoader
                 .loadFromRelativePath("ValidProductPricePayload.json", new TypeReference<PriceChange>() {});
-        mockCreatedProduct.setProductId(50480431L);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PriceChange> entity = new HttpEntity<>(mockCreatedProduct, headers);
@@ -40,15 +39,13 @@ public class CreateProductIntegrationTest {
                 HttpMethod.POST, entity, ProductInfo.class);
         Assert.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 
-        repo.deleteByProductId(50480431L);
+        repo.deleteByProductId(mockCreatedProduct.getProductId());
     }
 
     @Test
     public void setPriceData_Verify409_409ConflictWithExistingDocument() throws Exception{
         PriceChange mockCreatedProduct = TestResourceLoader
-                .loadFromRelativePath("ValidProductPricePayload.json", new TypeReference<PriceChange>() {});
-
-        mockCreatedProduct.setProductId(16700918L);
+                .loadFromRelativePath("ValidPayloadConflict.json", new TypeReference<PriceChange>() {});
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,6 +56,8 @@ public class CreateProductIntegrationTest {
         ResponseEntity<ProductInfo> newResponseEntity = restTemplate.exchange(MyRetailPath.CREATE_RESOURCE_PRICES,
                 HttpMethod.POST, entity, ProductInfo.class);
         Assert.assertEquals(HttpStatus.CONFLICT, newResponseEntity.getStatusCode());
+
+        repo.deleteByProductId(mockCreatedProduct.getProductId());
     }
 
     @Test
@@ -66,7 +65,7 @@ public class CreateProductIntegrationTest {
         PriceChange mockCreatedProduct = TestResourceLoader
                 .loadFromRelativePath("ValidProductPricePayload.json", new TypeReference<PriceChange>() {});
 
-        mockCreatedProduct.setProductId((long) (new Random().nextInt(89999999) + 10000000));
+        mockCreatedProduct.setProductId((long) (new Random().nextInt(100000000) + 10000000));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
