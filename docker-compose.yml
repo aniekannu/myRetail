@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  localhost:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=admin
+    restart: always
+    ports:
+      - "27017:27017"
+
+  myretail:
+    image: aniekannu/myretail
+    ports:
+      - "8080:8080"
+    links:
+      - localhost
+
+# This docker-compose file is still a work in progress
