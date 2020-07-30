@@ -1,4 +1,4 @@
-package com.aniekanudoessien.model;
+package com.aniekanudoessien.model.dbdocument;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

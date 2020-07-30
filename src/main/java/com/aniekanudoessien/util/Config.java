@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @Data
 public class Config {
 
+    // this field is linked to the Redsky
+    // Product Catalog and it's loaded from
+    // application.properties in src/main/resources
     @Value("${redsky.url}")
     private String redskyUrl;
 }

@@ -18,6 +18,8 @@ public class ProductsController {
     private ProductService productService;
 
     // for admin
+    // json object data from our client request body is bound to the PriceChange object
+    // PriceChange class consists of the productId and (price) value fields
     @PostMapping(value = MyRetailPath.RESOURCE_PRICES)
     public ResponseEntity<Object> setPriceData(@RequestBody PriceChange priceChange) throws Exception {
 
